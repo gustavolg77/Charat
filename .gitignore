@@ -1,7 +1,11 @@
-
+# Dependencias
 node_modules
-.env
-.env*
 client/node_modules
 server/node_modules
-distSet-Content .gitignore
+
+# Variables de entorno
+.env
+.env*
+
+# Builds
+dist
