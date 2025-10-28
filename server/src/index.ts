@@ -48,3 +48,43 @@ app.get("/api/users", async (_req, res) => {
 app.listen(port, () => {
   console.log(`API lista en http://localhost:${port}`);
 });
+// Crear usuario
+app.post("/api/users", async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    // Validaciones básicas
+    if (!name || !email) {
+      return res.status(400).json({
+        ok: false,
+        error: "name y email son requeridos"
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO users (name, email)
+       VALUES ($1, $2)
+       RETURNING id, name, email, created_at`,
+      [name, email]
+    );
+
+    res.status(201).json({
+      ok: true,
+      user: result.rows[0]
+    });
+
+  } catch (e: any) {
+    // Código de error PG para UNIQUE VIOLATION = 23505
+    if (e.code === "23505") {
+      return res.status(400).json({
+        ok: false,
+        error: "El email ya está registrado"
+      });
+    }
+
+    res.status(500).json({
+      ok: false,
+      error: e?.message || "insert error"
+    });
+  }
+});
